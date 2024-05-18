@@ -7,6 +7,7 @@ on:
   pull_request:
     branches:
       - main
+  workflow_dispatch:
 
 env:
   TF_IN_AUTOMATION: true
@@ -46,7 +47,7 @@ jobs:
 
       - name: Terraform Apply
         working-directory: terraform/
-        run: terraform destroy -auto-approve -var-file="environments/dev.tfvars"
+        run: terraform apply -auto-approve -var-file="environments/dev.tfvars"
         if: github.ref == 'refs/heads/main'
 
   deploy_staging:
@@ -55,6 +56,12 @@ jobs:
     needs: deploy_dev
 
     steps:
+      - name: Await manual approval for staging
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          event-type: staging-approval-required
+          token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Checkout repository
         uses: actions/checkout@v2
 
@@ -84,7 +91,7 @@ jobs:
 
       - name: Terraform Apply
         working-directory: terraform/
-        run: terraform destroy -auto-approve -var-file="environments/staging.tfvars"
+        run: terraform apply -auto-approve -var-file="environments/staging.tfvars"
         if: github.ref == 'refs/heads/main'
 
   deploy_prod:
@@ -93,6 +100,12 @@ jobs:
     needs: deploy_staging
 
     steps:
+      - name: Await manual approval for production
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          event-type: prod-approval-required
+          token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Checkout repository
         uses: actions/checkout@v2
 
@@ -122,8 +135,9 @@ jobs:
 
       - name: Terraform Apply
         working-directory: terraform/
-        run: terraform destroy -auto-approve -var-file="environments/prod.tfvars"
+        run: terraform apply -auto-approve -var-file="environments/prod.tfvars"
         if: github.ref == 'refs/heads/main'
+
 
 
 

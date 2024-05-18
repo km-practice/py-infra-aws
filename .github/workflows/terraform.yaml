@@ -1,14 +1,19 @@
-name: Terraform
+name: Terraform Deployment
 
 on:
   push:
     branches:
       - main
-  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+
+env:
+  TF_IN_AUTOMATION: true
 
 jobs:
   terraform:
-    name: 'Terraform'
+    name: Terraform Deployment
     runs-on: ubuntu-latest
 
     strategy:
@@ -16,49 +21,36 @@ jobs:
         environment: [dev, staging, prod]
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v1
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: 1.0.0
 
-      - name: Initial Terraform Init
-        working-directory: ./terraform
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        run: terraform init
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-2
 
-      - name: Select or Create Terraform Workspace
-        working-directory: ./terraform
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        run: terraform workspace select ${{ matrix.environment }} || terraform workspace new ${{ matrix.environment }}
-
-      - name: Reconfigure Terraform Backend
-        working-directory: ./terraform
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        run: terraform init -reconfigure -backend-config="key=state/${{ matrix.environment }}/terraform.tfstate"
+      - name: Initialize Terraform
+        working-directory: terraform/
+        run: |
+          terraform workspace new ${{ matrix.environment }} || terraform workspace select ${{ matrix.environment }}
+          terraform init -reconfigure -backend-config="key=state/${{ matrix.environment }}/terraform.tfstate"
 
       - name: Terraform Plan
-        working-directory: ./terraform
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        run: terraform plan -var-file=../environments/${{ matrix.environment }}.tfvars
+        working-directory: terraform/
+        run: terraform plan -var-file="../environments/${{ matrix.environment }}.tfvars"
 
       - name: Terraform Apply
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        working-directory: ./terraform
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        run: terraform apply -auto-approve -var-file=../environments/${{ matrix.environment }}.tfvars
+        working-directory: terraform/
+        run: terraform apply -auto-approve -var-file="../environments/${{ matrix.environment }}.tfvars"
+        if: github.ref == 'refs/heads/main'
+
 
 
 

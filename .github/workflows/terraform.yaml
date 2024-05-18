@@ -50,7 +50,7 @@ jobs:
 
       - name: Terraform Apply
         working-directory: terraform/
-        run: terraform apply -auto-approve -var-file="environments/${{ matrix.environment }}.tfvars"
+        run: terraform destroy -auto-approve -var-file="environments/${{ matrix.environment }}.tfvars"
         if: github.ref == 'refs/heads/main'
 
 

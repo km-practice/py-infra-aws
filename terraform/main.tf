@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "us-west-2"
+  region = "eu-west-2"
 }
 
 module "example" {
@@ -7,4 +7,9 @@ module "example" {
   ami           = var.ami
   instance_type = var.instance_type
   instance_name = var.instance_name
+}
+
+resource "aws_s3_bucket" "bbucket" {
+  bucket = "kjftypractice-${terraform.workspace}"
+  acl    = "private"
 }

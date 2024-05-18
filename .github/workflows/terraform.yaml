@@ -36,11 +36,13 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-west-2
 
-      - name: Initialize Terraform
+      - name: Initialize Terraform Backend
         working-directory: terraform/
-        run: |
-          terraform workspace new ${{ matrix.environment }} || terraform workspace select ${{ matrix.environment }}
-          terraform init -reconfigure -backend-config="key=state/${{ matrix.environment }}/terraform.tfstate"
+        run: terraform init -reconfigure -backend-config="key=state/${{ matrix.environment }}/terraform.tfstate"
+
+      - name: Select or Create Terraform Workspace
+        working-directory: terraform/
+        run: terraform workspace new ${{ matrix.environment }} || terraform workspace select ${{ matrix.environment }}
 
       - name: Terraform Plan
         working-directory: terraform/
@@ -50,6 +52,7 @@ jobs:
         working-directory: terraform/
         run: terraform apply -auto-approve -var-file="../environments/${{ matrix.environment }}.tfvars"
         if: github.ref == 'refs/heads/main'
+
 
 
 

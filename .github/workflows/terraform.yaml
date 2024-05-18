@@ -4,9 +4,9 @@ on:
   push:
     branches:
       - main
-  # pull_request:
-  #   branches:
-  #     - main
+  pull_request:
+    branches:
+      - main
 
 env:
   TF_IN_AUTOMATION: true
@@ -40,13 +40,55 @@ jobs:
         working-directory: terraform/
         run: terraform workspace new dev || terraform workspace select dev
 
+      # Terraform Tests
+      - name: Terraform Format Check
+        run: terraform fmt -check
+        working-directory: terraform/
+
+      - name: Terraform Initialize
+        run: terraform init
+        working-directory: terraform/
+
+      - name: Terraform Validate
+        run: terraform validate
+        working-directory: terraform/
+
+      - name: Set up Go for Terratest
+        uses: actions/setup-go@v2
+        with:
+          go-version: '^1.16'
+
+      - name: Setup Go module
+        run: |
+          if [ ! -f go.mod ]; then
+            go mod init example.com/terraform-test
+          fi
+          go mod tidy
+        working-directory: terraform/test/
+
+      - name: Run Terratest
+        run: go test -v ./test
+        working-directory: terraform/test/
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install Checkov
+        run: pip install checkov
+
+      - name: Compliance Check with Checkov
+        run: checkov -d terraform/
+
+      # Terraform Plan and Apply
       - name: Terraform Plan
         working-directory: terraform/
         run: terraform plan -var-file="environments/dev.tfvars"
 
       - name: Terraform Apply
         working-directory: terraform/
-        run: terraform destroy -auto-approve -var-file="environments/dev.tfvars"
+        run: terraform apply -auto-approve -var-file="environments/dev.tfvars"
         if: github.ref == 'refs/heads/main'
 
   deploy_staging:
@@ -85,7 +127,7 @@ jobs:
 
       - name: Terraform Apply
         working-directory: terraform/
-        run: terraform destroy -auto-approve -var-file="environments/staging.tfvars"
+        run: terraform apply -auto-approve -var-file="environments/staging.tfvars"
         if: github.ref == 'refs/heads/main'
 
   deploy_prod:
@@ -124,8 +166,9 @@ jobs:
 
       - name: Terraform Apply
         working-directory: terraform/
-        run: terraform destroy -auto-approve -var-file="environments/prod.tfvars"
+        run: terraform apply -auto-approve -var-file="environments/prod.tfvars"
         if: github.ref == 'refs/heads/main'
+
 
 
 

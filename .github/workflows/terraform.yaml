@@ -60,15 +60,15 @@ jobs:
 
       - name: Setup Go module
         run: |
+          cd terraform/test
           if [ ! -f go.mod ]; then
             go mod init example.com/terraform-test
           fi
           go mod tidy
-        working-directory: terraform/test/
 
       - name: Run Terratest
-        run: go test -v ./terraform/test
-        working-directory: terraform/test/
+        working-directory: terraform/test
+        run: go test -v
 
       - name: Set up Python
         uses: actions/setup-python@v2

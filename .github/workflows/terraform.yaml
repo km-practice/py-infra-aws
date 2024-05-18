@@ -60,15 +60,13 @@ jobs:
 
       - name: Setup Go module
         run: |
-          if [ ! -f go.mod ]; then
-            go mod init example.com/terraform-test
-          fi
+          cd terraform/test
+          go mod init example.com/terraform-test
+          go get github.com/gruntwork-io/terratest@v0.38.10
           go mod tidy
-        working-directory: terraform/test/
 
       - name: Run Terratest
-        run: go test -v ./test
-        working-directory: terraform/test/
+        run: go test -v ./terraform/test
 
       - name: Set up Python
         uses: actions/setup-python@v2
@@ -168,6 +166,7 @@ jobs:
         working-directory: terraform/
         run: terraform apply -auto-approve -var-file="environments/prod.tfvars"
         if: github.ref == 'refs/heads/main'
+
 
 
 

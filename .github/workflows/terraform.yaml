@@ -37,19 +37,19 @@ jobs:
           aws-region: eu-west-2
 
       - name: Initialize Terraform Backend
-        working-directory: terraform/
+        working-directory: ./terraform
         run: terraform init -reconfigure -backend-config="key=state/${{ matrix.environment }}/terraform.tfstate"
 
       - name: Select or Create Terraform Workspace
-        working-directory: terraform/
+        working-directory: ./terraform
         run: terraform workspace new ${{ matrix.environment }} || terraform workspace select ${{ matrix.environment }}
 
       - name: Terraform Plan
-        working-directory: terraform/
+        working-directory: ./terraform
         run: terraform plan -var-file="../environments/${{ matrix.environment }}.tfvars"
 
       - name: Terraform Apply
-        working-directory: terraform/
+        working-directory: ./terraform
         run: terraform apply -auto-approve -var-file="../environments/${{ matrix.environment }}.tfvars"
         if: github.ref == 'refs/heads/main'
 

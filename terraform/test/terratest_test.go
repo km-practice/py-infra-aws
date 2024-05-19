@@ -1,9 +1,9 @@
 package test
 
 import (
+    "path/filepath"
     "testing"
     "github.com/gruntwork-io/terratest/modules/terraform"
-    "path/filepath"
 )
 
 // TestTerraformBasicExample uses Terratest to test a basic Terraform configuration.
@@ -30,3 +30,4 @@ func TestTerraformBasicExample(t *testing.T) {
         t.Fatalf("Failed to apply Terraform: %v", err)
     }
 }
+

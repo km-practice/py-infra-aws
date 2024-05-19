@@ -82,16 +82,6 @@ jobs:
         run: checkov -d terraform/
         continue-on-error: true
 
-      # Terraform Plan and Apply
-      - name: Terraform Plan
-        working-directory: terraform/
-        run: terraform plan -var-file="environments/dev.tfvars"
-
-      - name: Terraform Apply
-        working-directory: terraform/
-        run: terraform destroy -auto-approve -var-file="environments/dev.tfvars"
-        if: github.ref == 'refs/heads/main'
-
   deploy_staging:
     name: Deploy to staging
     runs-on: ubuntu-latest

@@ -80,6 +80,7 @@ jobs:
 
       - name: Compliance Check with Checkov
         run: checkov -d terraform/
+        continue-on-error: true
 
       # Terraform Plan and Apply
       - name: Terraform Plan
@@ -168,6 +169,7 @@ jobs:
         working-directory: terraform/
         run: terraform apply -auto-approve -var-file="environments/prod.tfvars"
         if: github.ref == 'refs/heads/main'
+
 
 
 

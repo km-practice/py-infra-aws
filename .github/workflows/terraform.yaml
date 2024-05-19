@@ -89,7 +89,7 @@ jobs:
 
       - name: Terraform Apply
         working-directory: terraform/
-        run: terraform apply -auto-approve -var-file="environments/dev.tfvars"
+        run: terraform destroy -auto-approve -var-file="environments/dev.tfvars"
         if: github.ref == 'refs/heads/main'
 
   deploy_staging:

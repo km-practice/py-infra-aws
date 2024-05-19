@@ -13,6 +13,3 @@ variable "instance_name" {
   type        = string
 }
 
-output "instance_id" {
-  value = aws_instance.example.id
-}

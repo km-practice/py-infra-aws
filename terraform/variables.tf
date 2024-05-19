@@ -1,14 +1,16 @@
 variable "ami" {
-  description = "AMI ID"
-  type        = string
+  type = string
 }
 
 variable "instance_type" {
-  description = "Instance type"
-  type        = string
+  type = string
 }
 
 variable "instance_name" {
-  description = "Instance name"
-  type        = string
+  type = string
+}
+
+variable "region" {
+  type    = string
+  default = "eu-west-2"
 }

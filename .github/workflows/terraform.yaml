@@ -23,10 +23,10 @@ jobs:
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: 'latest'  # Automatically installs the latest version of Terraform
+          terraform_version: 'latest'
 
       - name: Verify Terraform Version
-        run: terraform version  # Print the Terraform version to ensure it's the latest
+        run: terraform version
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -43,7 +43,6 @@ jobs:
         working-directory: terraform/
         run: terraform workspace new dev || terraform workspace select dev
 
-      # Terraform Tests
       - name: Terraform Format Check
         run: terraform fmt -check
         working-directory: terraform/
@@ -61,15 +60,13 @@ jobs:
         with:
           go-version: '^1.16'
 
-      - name: Setup Go module
+      - name: Create and initialize Go module
+        working-directory: terraform/test
         run: |
-          cd terraform/test
-          if [ ! -f go.mod ]; then
-            go mod init example.com/terraform-test
-          fi
+          go mod init example.com/terraform-test
+          go get github.com/gruntwork-io/terratest/modules/aws
           go mod tidy
 
-      # Run Tests
       - name: Run Go Tests
         working-directory: terraform/test
         run: go test -v

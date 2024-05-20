@@ -1,5 +1,3 @@
-package test
-
 import (
     "fmt"
     "os"
@@ -11,37 +9,6 @@ import (
     "github.com/gruntwork-io/terratest/modules/terraform"
     "github.com/stretchr/testify/assert"
 )
-
-// Example unit test function
-func TestAddition(t *testing.T) {
-    result := add(2, 3)
-    expected := 5
-    if result != expected {
-        t.Errorf("Expected %d but got %d", expected, result)
-    }
-}
-
-func add(a int, b int) int {
-    return a + b
-}
-
-func TestTerraformBasicExample(t *testing.T) {
-    verifyTerraformVersion(t)
-
-    cwd, err := os.Getwd()
-    if err != nil {
-        t.Fatal(err)
-    }
-    fmt.Println("Current working directory:", cwd)
-
-    terraformOptions := &terraform.Options{
-        TerraformDir: "../",
-        VarFiles: []string{filepath.Join(cwd, "..", "environments", "dev.tfvars")},
-    }
-
-    defer terraform.Destroy(t, terraformOptions)
-    terraform.InitAndApply(t, terraformOptions)
-}
 
 func TestEndToEnd(t *testing.T) {
     verifyTerraformVersion(t)
@@ -65,11 +32,11 @@ func TestEndToEnd(t *testing.T) {
     region := "eu-west-2"
 
     // Wait for the instance to be in running state
-    aws.WaitForEC2InstanceStatus(t, region, instanceID, "running")
+    aws.WaitForInstanceStatus(t, region, instanceID, "running")
 
     // Example: Add more end-to-end checks
-    instanceState := aws.GetInstanceState(t, region, instanceID)
-    assert.Equal(t, "running", instanceState)
+    instanceStatus := aws.GetInstanceStatus(t, region, instanceID)
+    assert.Equal(t, "running", instanceStatus)
 }
 
 func verifyTerraformVersion(t *testing.T) {
@@ -80,6 +47,7 @@ func verifyTerraformVersion(t *testing.T) {
     }
     fmt.Printf("Terraform version: %s\n", output)
 }
+
 
 
 

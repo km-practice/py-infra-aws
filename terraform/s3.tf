@@ -10,7 +10,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "example" {
     status = "Enabled"
 
     filter {
-      prefix = "logs/" # Ensure the case matches the prefix used in your S3 bucket
+      prefix = "logs/"  # Ensure the case matches the prefix used in your S3 bucket
     }
 
     transition {
@@ -21,8 +21,13 @@ resource "aws_s3_bucket_lifecycle_configuration" "example" {
     expiration {
       days = 90
     }
+
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 7
+    }
   }
 }
+
 
 
 resource "aws_s3_bucket_acl" "example" {

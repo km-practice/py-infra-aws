@@ -78,7 +78,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "good_sse_1" {
 resource "aws_s3_bucket_logging" "example" {
   bucket = aws_s3_bucket.bbucket.id
 
-  target_bucket = aws_s3_bucket.log_bucket.id
+  target_bucket = aws_s3_bucket.bbucket.id
   target_prefix = "log/"
 }
 

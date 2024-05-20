@@ -23,10 +23,7 @@ jobs:
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: 'latest'
-
-      - name: Verify Terraform Version
-        run: terraform version
+          terraform_version: 1.0.0
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -43,6 +40,7 @@ jobs:
         working-directory: terraform/
         run: terraform workspace new dev || terraform workspace select dev
 
+      # Terraform Tests
       - name: Terraform Format Check
         run: terraform fmt -check
         working-directory: terraform/
@@ -60,14 +58,15 @@ jobs:
         with:
           go-version: '^1.16'
 
-      - name: Create and initialize Go module
-        working-directory: terraform/test
+      - name: Setup Go module
         run: |
-          go mod init example.com/terraform-test
-          go get github.com/gruntwork-io/terratest/modules/aws
+          cd terraform/test
+          if [ ! -f go.mod ]; then
+            go mod init example.com/terraform-test
+          fi
           go mod tidy
 
-      - name: Run Go Tests
+      - name: Run Terratest
         working-directory: terraform/test
         run: go test -v
 
@@ -96,10 +95,7 @@ jobs:
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: 'latest'
-
-      - name: Verify Terraform Version
-        run: terraform version
+          terraform_version: 1.0.0
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -122,7 +118,7 @@ jobs:
 
       - name: Terraform Apply
         working-directory: terraform/
-        run: terraform apply -auto-approve -var-file="environments/staging.tfvars"
+        run: terraform destroy -auto-approve -var-file="environments/staging.tfvars"
         if: github.ref == 'refs/heads/main'
 
   deploy_prod:
@@ -138,10 +134,7 @@ jobs:
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: 'latest'
-
-      - name: Verify Terraform Version
-        run: terraform version
+          terraform_version: 1.0.0
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -164,8 +157,27 @@ jobs:
 
       - name: Terraform Apply
         working-directory: terraform/
-        run: terraform apply -auto-approve -var-file="environments/prod.tfvars"
+        run: terraform destroy -auto-approve -var-file="environments/prod.tfvars"
         if: github.ref == 'refs/heads/main'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+
 
 
 

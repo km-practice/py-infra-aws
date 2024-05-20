@@ -1,3 +1,5 @@
+package test
+
 import (
     "fmt"
     "os"
@@ -47,6 +49,7 @@ func verifyTerraformVersion(t *testing.T) {
     }
     fmt.Printf("Terraform version: %s\n", output)
 }
+
 
 
 

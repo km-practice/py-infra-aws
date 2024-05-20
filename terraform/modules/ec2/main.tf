@@ -13,7 +13,21 @@ resource "aws_instance" "example" {
   tags = {
     Name = var.instance_name
   }
+
+  # Adding encrypted EBS block
+  ebs_block_device {
+    device_name = "/dev/sdh"  # Example device name, adjust as necessary
+    volume_type = "gp2"       # Example volume type, adjust as necessary
+    volume_size = 20          # Example size in GB, adjust as necessary
+    encrypted   = true        # Ensure encryption is enabled
+  }
+
+  root_block_device {
+    encrypted = true
+    kms_key_id = aws_kms_key.my_key.arn
+  }
 }
+
 
 
 resource "aws_launch_configuration" "example" {

@@ -10,7 +10,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "example" {
     status = "Enabled"
 
     filter {
-      prefix = "logs/"  # Ensure the case matches the prefix used in your S3 bucket
+      prefix = "logs/" # Ensure the case matches the prefix used in your S3 bucket
     }
 
     transition {
@@ -38,8 +38,10 @@ resource "aws_s3_bucket_acl" "example" {
 resource "aws_s3_bucket_public_access_block" "access_good_1" {
   bucket = aws_s3_bucket.bbucket.id
 
-  block_public_acls   = true
-  block_public_policy = true
+  block_public_acls       = true
+  block_public_policy     = true
+  restrict_public_buckets = true
+  ignore_public_acls      = true
 }
 
 resource "aws_s3_bucket_versioning" "versioning_example" {
@@ -80,3 +82,34 @@ resource "aws_s3_bucket_logging" "example" {
   target_bucket = aws_s3_bucket.log_bucket.id
   target_prefix = "log/"
 }
+
+resource "aws_sns_topic" "example" {
+
+  name              = "user-updates-topic"
+  kms_master_key_id = "alias/aws/sns"
+}
+
+resource "aws_kms_key" "mykey" {
+  description             = "KMS key for S3 bucket encryption"
+  enable_key_rotation     = true  # Enables automatic yearly rotation of the key
+  deletion_window_in_days = 10    # Optional: Specifies the waiting period before the key gets deleted
+
+  policy = <<POLICY
+{
+  "Version": "2012-10-17",
+  "Id": "key-default-1",
+  "Statement": [
+    {
+      "Sid": "Enable IAM User Permissions",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::123456789012:root"
+      },
+      "Action": "kms:*",
+      "Resource": "*"
+    }
+  ]
+}
+POLICY
+}
+

@@ -23,7 +23,7 @@ jobs:
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: 1.0.0
+          terraform_version: 1.4.6
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -40,7 +40,6 @@ jobs:
         working-directory: terraform/
         run: terraform workspace new dev || terraform workspace select dev
 
-      # Terraform Tests
       - name: Terraform Format Check
         run: terraform fmt -check
         working-directory: terraform/
@@ -95,7 +94,7 @@ jobs:
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: 1.0.0
+          terraform_version: 1.4.6
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -118,7 +117,7 @@ jobs:
 
       - name: Terraform Apply
         working-directory: terraform/
-        run: terraform destroy -auto-approve -var-file="environments/staging.tfvars"
+        run: terraform apply -auto-approve -var-file="environments/staging.tfvars"
         if: github.ref == 'refs/heads/main'
 
   deploy_prod:
@@ -134,7 +133,7 @@ jobs:
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: 1.0.0
+          terraform_version: 1.4.6
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -157,8 +156,9 @@ jobs:
 
       - name: Terraform Apply
         working-directory: terraform/
-        run: terraform destroy -auto-approve -var-file="environments/prod.tfvars"
+        run: terraform apply -auto-approve -var-file="environments/prod.tfvars"
         if: github.ref == 'refs/heads/main'
+
 
 
 

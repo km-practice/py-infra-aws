@@ -10,7 +10,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "example" {
     status = "Enabled"
 
     filter {
-      prefix = "logs/"
+      prefix = "logs/"  # Adjust this as necessary for your specific use case.
     }
 
     transition {
@@ -27,9 +27,6 @@ resource "aws_s3_bucket_lifecycle_configuration" "example" {
     }
   }
 }
-
-
-
 
 resource "aws_s3_bucket_acl" "example" {
   bucket = aws_s3_bucket.bbucket.id

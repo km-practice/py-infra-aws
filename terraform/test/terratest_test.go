@@ -6,6 +6,7 @@ import (
     "path/filepath"
     "os/exec"
     "testing"
+    "time"
 
     "github.com/gruntwork-io/terratest/modules/aws"
     "github.com/gruntwork-io/terratest/modules/terraform"
@@ -63,11 +64,13 @@ func TestEndToEnd(t *testing.T) {
     // Example: Validate AWS resources
     instanceID := terraform.Output(t, terraformOptions, "instance_id")
     region := "eu-west-2"
-    aws.AssertEC2InstanceRunning(t, region, instanceID)
+
+    // Wait for the instance to be in running state
+    aws.WaitForInstanceStatus(t, region, instanceID, "running", 5*time.Minute)
 
     // Example: Add more end-to-end checks
-    instanceState := aws.GetEC2InstanceState(t, region, instanceID)
-    assert.Equal(t, "running", instanceState)
+    instance := aws.GetEC2InstanceById(t, region, instanceID)
+    assert.Equal(t, "running", *instance.State.Name)
 }
 
 func verifyTerraformVersion(t *testing.T) {
@@ -78,6 +81,7 @@ func verifyTerraformVersion(t *testing.T) {
     }
     fmt.Printf("Terraform version: %s\n", output)
 }
+
 
 
 

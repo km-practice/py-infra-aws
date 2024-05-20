@@ -28,8 +28,6 @@ resource "aws_instance" "example" {
   }
 }
 
-
-
 resource "aws_launch_configuration" "example" {
   name_prefix   = "example-lc-"
   image_id      = var.ami # Assuming you want to use the same AMI as for the aws_instance
@@ -39,4 +37,9 @@ resource "aws_launch_configuration" "example" {
     encrypted = true
   }
 
+  metadata_options {
+    http_tokens         = "required" # Enforces the use of IMDSv2
+    http_endpoint       = "enabled"
+    http_put_response_hop_limit = 1
+  }
 }

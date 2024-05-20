@@ -10,7 +10,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "example" {
     status = "Enabled"
 
     filter {
-      prefix = "logs/" # Ensure the case matches the prefix used in your S3 bucket
+      prefix = "logs/"
     }
 
     transition {
@@ -27,6 +27,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "example" {
     }
   }
 }
+
 
 
 

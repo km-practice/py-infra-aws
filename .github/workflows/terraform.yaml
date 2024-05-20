@@ -70,13 +70,13 @@ jobs:
       #   working-directory: terraform/test
       #   run: go test -v
 
-      # - name: Set up Python
-      #   uses: actions/setup-python@v2
-      #   with:
-      #     python-version: '3.x'
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
 
       - name: Install Checkov
-        run: pip install checkov
+        run: pip install --upgrade checkov
 
       - name: Compliance Check with Checkov
         run: checkov -d terraform/

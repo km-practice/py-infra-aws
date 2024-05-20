@@ -8,8 +8,3 @@ module "example" {
   instance_type = var.instance_type
   instance_name = var.instance_name
 }
-
-resource "aws_s3_bucket" "bbucket" {
-  bucket = "kjftypractice-${terraform.workspace}"
-  acl    = "private"
-}

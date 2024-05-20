@@ -12,14 +12,6 @@ resource "aws_instance" "example" {
   tags = {
     Name = var.instance_name
   }
-
-  # Assuming this EC2 instance will have additional EBS volumes:
-  ebs_block_device {
-    device_name = "/dev/sdh"  # Example device name, adjust as necessary
-    encrypted   = true
-    volume_size = 50          # Example size in GB, adjust as necessary
-    delete_on_termination = true
-  }
 }
 
 

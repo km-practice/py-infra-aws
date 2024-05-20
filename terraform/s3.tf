@@ -10,7 +10,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "example" {
     status = "Enabled"
 
     filter {
-      prefix = "logs/"  # Adjust this as necessary for your specific use case.
+      prefix = "logs/" # Adjust this as necessary for your specific use case.
     }
 
     transition {
@@ -50,7 +50,7 @@ resource "aws_s3_bucket_versioning" "versioning_example" {
 }
 
 resource "aws_sns_topic" "bucket_notifications" {
-  name = "bucket-notifications"
+  name              = "bucket-notifications"
   kms_master_key_id = "alias/aws/sns"
 }
 
@@ -90,8 +90,8 @@ resource "aws_sns_topic" "example" {
 
 resource "aws_kms_key" "mykey" {
   description             = "KMS key for S3 bucket encryption"
-  enable_key_rotation     = true  # Enables automatic yearly rotation of the key
-  deletion_window_in_days = 10    # Optional: Specifies the waiting period before the key gets deleted
+  enable_key_rotation     = true # Enables automatic yearly rotation of the key
+  deletion_window_in_days = 10   # Optional: Specifies the waiting period before the key gets deleted
 
   policy = <<POLICY
 {

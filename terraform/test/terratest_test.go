@@ -4,6 +4,7 @@ import (
     "fmt"
     "os"
     "path/filepath"
+    "os/exec"
     "testing"
 
     "github.com/gruntwork-io/terratest/modules/aws"
@@ -25,6 +26,8 @@ func add(a int, b int) int {
 }
 
 func TestTerraformBasicExample(t *testing.T) {
+    verifyTerraformVersion(t)
+
     cwd, err := os.Getwd()
     if err != nil {
         t.Fatal(err)
@@ -41,6 +44,8 @@ func TestTerraformBasicExample(t *testing.T) {
 }
 
 func TestEndToEnd(t *testing.T) {
+    verifyTerraformVersion(t)
+
     cwd, err := os.Getwd()
     if err != nil {
         t.Fatal(err)
@@ -64,6 +69,16 @@ func TestEndToEnd(t *testing.T) {
     instanceState := aws.GetEC2InstanceState(t, region, instanceID)
     assert.Equal(t, "running", instanceState)
 }
+
+func verifyTerraformVersion(t *testing.T) {
+    cmd := exec.Command("terraform", "version")
+    output, err := cmd.CombinedOutput()
+    if err != nil {
+        t.Fatalf("Failed to get Terraform version: %v", err)
+    }
+    fmt.Printf("Terraform version: %s\n", output)
+}
+
 
 
 

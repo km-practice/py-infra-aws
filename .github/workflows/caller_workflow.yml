@@ -17,6 +17,6 @@ jobs:
         uses: peter-evans/repository-dispatch@v1
         with:
           token: ${{ secrets.PAT_TOKEN }}
-          repository: KudziDave/reusable-terraform-plan-apply
+          repository: km-practice/reusable-terraform-plan-apply
           event-type: terraform-plan-apply
           client-payload: '{"ref": "main"}'

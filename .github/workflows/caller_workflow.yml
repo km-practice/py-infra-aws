@@ -6,7 +6,6 @@ on:
 
       workflow_dispatch:
    
-
 jobs:
   trigger_terraform_pipeline:
     name: Trigger Terraform Pipeline

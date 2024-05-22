@@ -1,12 +1,10 @@
 name: Terraform Deployment
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+  repository_dispatch:
+    types: [terraform-plan-apply]
+
+  workflow_dispatch:
 
 env:
   TF_IN_AUTOMATION: true

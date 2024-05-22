@@ -1,8 +1,9 @@
 name: Trigger Terraform Plan Apply on Push
 
 on:
-      repository_dispatch:
-        types: [terraform-plan-apply]
+      push:
+        branches:
+          - main
 
       workflow_dispatch:
    

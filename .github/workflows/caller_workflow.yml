@@ -17,6 +17,6 @@ jobs:
         uses: peter-evans/repository-dispatch@v1
         with:
           token: ${{ secrets.PAT_TOKEN }}
-          repository: km-practice/reusable-terraform-plan-apply
+          repository: km-practice/py-infra-aws
           event-type: terraform-plan-apply
           client-payload: '{"ref": "main"}'

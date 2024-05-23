@@ -1,0 +1,11 @@
+name: Call a reusable workflow
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  call-workflow:
+    uses: ./.github/workflows/reusable_terraform_plan.yml
+    secrets: inherit

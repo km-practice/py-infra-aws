@@ -63,7 +63,7 @@ jobs:
 
       - name: Setup Go module
         run: |
-          cd terraform/test
+          cd ./test
           if [ ! -f go.mod ]; then
             go mod init example.com/terraform-test
           fi

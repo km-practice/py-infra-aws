@@ -1,7 +1,12 @@
 name: Call a reusable workflow
 
 on:
+  push:
+    branches:
+      - main
+
   workflow_dispatch:
+
     inputs:
       environments:
         description: 'Comma-separated list of environments to deploy to (e.g., dev,staging,prod)'

@@ -15,6 +15,9 @@ jobs:
   deploy_dev:
     name: Deploy to dev
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./terraform
 
     steps:
       - name: Checkout repository
@@ -33,25 +36,25 @@ jobs:
           aws-region: eu-west-2
 
       - name: Initialize Terraform Backend
-        working-directory: terraform/
+        # working-directory: terraform/
         run: terraform init -reconfigure -backend-config="key=state/dev/terraform.tfstate"
 
       - name: Select or Create Terraform Workspace
-        working-directory: terraform/
+        # working-directory: terraform/
         run: terraform workspace new dev || terraform workspace select dev
 
       # Terraform Tests
       - name: Terraform Format Check
         run: terraform fmt -check
-        working-directory: terraform/
+        # working-directory: terraform/
 
       - name: Terraform Initialize
         run: terraform init
-        working-directory: terraform/
+        # working-directory: terraform/
 
       - name: Terraform Validate
         run: terraform validate
-        working-directory: terraform/
+        # working-directory: terraform/
 
       - name: Set up Go for Terratest
         uses: actions/setup-go@v2
@@ -105,19 +108,19 @@ jobs:
           aws-region: eu-west-2
 
       - name: Initialize Terraform Backend
-        working-directory: terraform/
+        # working-directory: terraform/
         run: terraform init -reconfigure -backend-config="key=state/staging/terraform.tfstate"
 
       - name: Select or Create Terraform Workspace
-        working-directory: terraform/
+        # working-directory: terraform/
         run: terraform workspace new staging || terraform workspace select staging
 
       - name: Terraform Plan
-        working-directory: terraform/
+        # working-directory: terraform/
         run: terraform plan -var-file="environments/staging.tfvars"
 
       - name: Terraform Apply
-        working-directory: terraform/
+        # working-directory: terraform/
         run: terraform destroy -auto-approve -var-file="environments/staging.tfvars"
         if: github.ref == 'refs/heads/main'
 
@@ -144,19 +147,19 @@ jobs:
           aws-region: eu-west-2
 
       - name: Initialize Terraform Backend
-        working-directory: terraform/
+        # working-directory: terraform/
         run: terraform init -reconfigure -backend-config="key=state/prod/terraform.tfstate"
 
       - name: Select or Create Terraform Workspace
-        working-directory: terraform/
+        # working-directory: terraform/
         run: terraform workspace new prod || terraform workspace select prod
 
       - name: Terraform Plan
-        working-directory: terraform/
+        # working-directory: terraform/
         run: terraform plan -var-file="environments/prod.tfvars"
 
       - name: Terraform Apply
-        working-directory: terraform/
+        # working-directory: terraform/
         run: terraform destroy -auto-approve -var-file="environments/prod.tfvars"
         if: github.ref == 'refs/heads/main'
 

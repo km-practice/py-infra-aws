@@ -1,12 +1,16 @@
 name: Call a reusable workflow
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
+    inputs:
+      environments:
+        description: 'Comma-separated list of environments to deploy to (e.g., dev,staging,prod)'
+        required: true
+        default: 'dev,staging,prod'
 
 jobs:
   call-workflow-dev:
+    if: contains(github.event.inputs.environments, 'dev')
     uses: ./.github/workflows/reusable_terraform_plan.yml
     with:
       environment: 'dev'
@@ -19,6 +23,7 @@ jobs:
     secrets: inherit
 
   call-workflow-staging:
+    if: contains(github.event.inputs.environments, 'staging')
     needs: call-workflow-dev
     uses: ./.github/workflows/reusable_terraform_plan.yml
     with:
@@ -32,6 +37,7 @@ jobs:
     secrets: inherit
 
   call-workflow-prod:
+    if: contains(github.event.inputs.environments, 'prod')
     needs: call-workflow-staging
     uses: ./.github/workflows/reusable_terraform_plan.yml
     with:
@@ -43,3 +49,4 @@ jobs:
       workspace: 'prod'
       var_file: 'environments/prod.tfvars'
     secrets: inherit
+

@@ -81,7 +81,7 @@ jobs:
 
       - name: Terraform Apply
         working-directory: ${{ inputs.working_directory }}
-        run: terraform apply -auto-approve -var-file="${{ inputs.var_file }}"
+        run: terraform destroy -auto-approve -var-file="${{ inputs.var_file }}"
         if: github.ref == 'refs/heads/main'
 
       - name: Set up Go for Terratest

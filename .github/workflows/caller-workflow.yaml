@@ -11,12 +11,11 @@ on:
         required: true
         default: 'dev,staging,prod'
 
-env:
-  ENVIRONMENTS: ${{ github.event.inputs.environments || 'dev,staging,prod' }}
-
 jobs:
   call-workflow-dev:
-    if: contains(env.ENVIRONMENTS, 'dev')
+    env:
+      ENVIRONMENTS: ${{ github.event.inputs.environments || 'dev,staging,prod' }}
+    if: contains(fromJson('["' + env.ENVIRONMENTS.replace(',', '","') + '"]'), 'dev')
     uses: ./.github/workflows/reusable_terraform_plan.yml
     with:
       environment: 'dev'
@@ -29,7 +28,9 @@ jobs:
     secrets: inherit
 
   call-workflow-staging:
-    if: contains(env.ENVIRONMENTS, 'staging')
+    env:
+      ENVIRONMENTS: ${{ github.event.inputs.environments || 'dev,staging,prod' }}
+    if: contains(fromJson('["' + env.ENVIRONMENTS.replace(',', '","') + '"]'), 'staging')
     needs: call-workflow-dev
     uses: ./.github/workflows/reusable_terraform_plan.yml
     with:
@@ -43,7 +44,9 @@ jobs:
     secrets: inherit
 
   call-workflow-prod:
-    if: contains(env.ENVIRONMENTS, 'prod')
+    env:
+      ENVIRONMENTS: ${{ github.event.inputs.environments || 'dev,staging,prod' }}
+    if: contains(fromJson('["' + env.ENVIRONMENTS.replace(',', '","') + '"]'), 'prod')
     needs: call-workflow-staging
     uses: ./.github/workflows/reusable_terraform_plan.yml
     with:
@@ -55,6 +58,7 @@ jobs:
       workspace: 'prod'
       var_file: 'environments/prod.tfvars'
     secrets: inherit
+
 
 
 

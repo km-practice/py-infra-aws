@@ -1,0 +1,31 @@
+name: Call Reusable Terraform Workflow Dynamically
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  call-workflow:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        environment:
+          - dev
+          - staging
+          - prod
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Call reusable workflow
+        uses: ./.github/actions/reusable_terraform_plan.yml
+        with:
+          environment: ${{ matrix.environment }}
+          working_directory: './terraform'
+          aws_region: 'eu-west-2'
+          terraform_version: '1.0.0'
+          backend_config_key: 'state/${{ matrix.environment }}/terraform.tfstate'
+          workspace: ${{ matrix.environment }}
+          var_file: 'environments/${{ matrix.environment }}.tfvars'
+          secrets: inherit

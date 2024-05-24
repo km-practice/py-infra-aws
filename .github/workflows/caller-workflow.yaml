@@ -25,7 +25,7 @@ jobs:
           backend_config_key: 'state/${{ matrix.environment }}/terraform.tfstate'
           workspace: ${{ matrix.environment }}
           var_file: 'environments/${{ matrix.environment }}.tfvars'
-    secrets: inherit
+          secrets: inherit
 
 
 

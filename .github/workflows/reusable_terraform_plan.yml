@@ -113,10 +113,10 @@ jobs:
         run: terraform workspace new staging || terraform workspace select staging
 
       - name: Terraform Plan
-        run: terraform plan -var-file="environments/staging.tfvars"
+        run: terraform plan -var-file="./environments/staging.tfvars"
 
       - name: Terraform Apply
-        run: terraform destroy -auto-approve -var-file="environments/staging.tfvars"
+        run: terraform destroy -auto-approve -var-file="./environments/staging.tfvars"
         if: github.ref == 'refs/heads/main'
 
   deploy_prod:
@@ -148,10 +148,10 @@ jobs:
         run: terraform workspace new prod || terraform workspace select prod
 
       - name: Terraform Plan
-        run: terraform plan -var-file="environments/prod.tfvars"
+        run: terraform plan -var-file="./environments/prod.tfvars"
 
       - name: Terraform Apply
-        run: terraform destroy -auto-approve -var-file="environments/prod.tfvars"
+        run: terraform destroy -auto-approve -var-file="./environments/prod.tfvars"
         if: github.ref == 'refs/heads/main'
 
 

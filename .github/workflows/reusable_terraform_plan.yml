@@ -82,7 +82,7 @@ jobs:
         run: pip install --upgrade checkov
 
       - name: Compliance Check with Checkov
-        run: checkov -d terraform/
+        run: checkov -d ./
         continue-on-error: true
 
   deploy_staging:

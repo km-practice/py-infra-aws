@@ -11,53 +11,60 @@ on:
         required: true
         default: 'dev,staging,prod'
 
+env:
+  ENVIRONMENTS: ${{ github.event.inputs.environments || 'dev,staging,prod' }}
+
 jobs:
   call-workflow-dev:
-    env:
-      ENVIRONMENTS: ${{ github.event.inputs.environments || 'dev,staging,prod' }}
     if: contains(fromJson('["' + env.ENVIRONMENTS.replace(',', '","') + '"]'), 'dev')
-    uses: ./.github/workflows/reusable_terraform_plan.yml
-    with:
-      environment: 'dev'
-      working_directory: './terraform'
-      aws_region: 'eu-west-2'
-      terraform_version: '1.0.0'
-      backend_config_key: 'state/dev/terraform.tfstate'
-      workspace: 'dev'
-      var_file: 'environments/dev.tfvars'
-    secrets: inherit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call reusable workflow for dev
+        uses: ./.github/workflows/reusable_terraform_plan.yml
+        with:
+          environment: 'dev'
+          working_directory: './terraform'
+          aws_region: 'eu-west-2'
+          terraform_version: '1.0.0'
+          backend_config_key: 'state/dev/terraform.tfstate'
+          workspace: 'dev'
+          var_file: 'environments/dev.tfvars'
+        secrets: inherit
 
   call-workflow-staging:
-    env:
-      ENVIRONMENTS: ${{ github.event.inputs.environments || 'dev,staging,prod' }}
     if: contains(fromJson('["' + env.ENVIRONMENTS.replace(',', '","') + '"]'), 'staging')
     needs: call-workflow-dev
-    uses: ./.github/workflows/reusable_terraform_plan.yml
-    with:
-      environment: 'staging'
-      working_directory: './terraform'
-      aws_region: 'eu-west-2'
-      terraform_version: '1.0.0'
-      backend_config_key: 'state/staging/terraform.tfstate'
-      workspace: 'staging'
-      var_file: 'environments/staging.tfvars'
-    secrets: inherit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call reusable workflow for staging
+        uses: ./.github/workflows/reusable_terraform_plan.yml
+        with:
+          environment: 'staging'
+          working_directory: './terraform'
+          aws_region: 'eu-west-2'
+          terraform_version: '1.0.0'
+          backend_config_key: 'state/staging/terraform.tfstate'
+          workspace: 'staging'
+          var_file: 'environments/staging.tfvars'
+        secrets: inherit
 
   call-workflow-prod:
-    env:
-      ENVIRONMENTS: ${{ github.event.inputs.environments || 'dev,staging,prod' }}
     if: contains(fromJson('["' + env.ENVIRONMENTS.replace(',', '","') + '"]'), 'prod')
     needs: call-workflow-staging
-    uses: ./.github/workflows/reusable_terraform_plan.yml
-    with:
-      environment: 'prod'
-      working_directory: './terraform'
-      aws_region: 'eu-west-2'
-      terraform_version: '1.0.0'
-      backend_config_key: 'state/prod/terraform.tfstate'
-      workspace: 'prod'
-      var_file: 'environments/prod.tfvars'
-    secrets: inherit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call reusable workflow for prod
+        uses: ./.github/workflows/reusable_terraform_plan.yml
+        with:
+          environment: 'prod'
+          working_directory: './terraform'
+          aws_region: 'eu-west-2'
+          terraform_version: '1.0.0'
+          backend_config_key: 'state/prod/terraform.tfstate'
+          workspace: 'prod'
+          var_file: 'environments/prod.tfvars'
+        secrets: inherit
+
 
 
 

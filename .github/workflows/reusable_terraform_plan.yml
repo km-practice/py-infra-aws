@@ -2,9 +2,13 @@ name: Terraform Deployment
 
 on:
   workflow_call:
-    secrets:
-      token:
-        required: false
+    inputs:
+      working_directory:
+        required: true
+        type: string
+      aws_region:
+        required: true
+        type: string
 
   workflow_dispatch:
 
@@ -17,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./terraform
+        working-directory: ${{ github.workspace }}/${{ inputs.working_directory }}
 
     steps:
       - name: Checkout repository
@@ -33,28 +37,23 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-west-2
+          aws-region: aws_region
 
       - name: Initialize Terraform Backend
-        # working-directory: terraform/
         run: terraform init -reconfigure -backend-config="key=state/dev/terraform.tfstate"
 
       - name: Select or Create Terraform Workspace
-        # working-directory: terraform/
         run: terraform workspace new dev || terraform workspace select dev
 
       # Terraform Tests
       - name: Terraform Format Check
         run: terraform fmt -check
-        # working-directory: terraform/
 
       - name: Terraform Initialize
         run: terraform init
-        # working-directory: terraform/
 
       - name: Terraform Validate
         run: terraform validate
-        # working-directory: terraform/
 
       - name: Set up Go for Terratest
         uses: actions/setup-go@v2
@@ -105,22 +104,18 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-west-2
+          aws-region: aws_region
 
       - name: Initialize Terraform Backend
-        # working-directory: terraform/
         run: terraform init -reconfigure -backend-config="key=state/staging/terraform.tfstate"
 
       - name: Select or Create Terraform Workspace
-        # working-directory: terraform/
         run: terraform workspace new staging || terraform workspace select staging
 
       - name: Terraform Plan
-        # working-directory: terraform/
         run: terraform plan -var-file="environments/staging.tfvars"
 
       - name: Terraform Apply
-        # working-directory: terraform/
         run: terraform destroy -auto-approve -var-file="environments/staging.tfvars"
         if: github.ref == 'refs/heads/main'
 
@@ -144,22 +139,18 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-west-2
+          aws-region: aws_region
 
       - name: Initialize Terraform Backend
-        # working-directory: terraform/
         run: terraform init -reconfigure -backend-config="key=state/prod/terraform.tfstate"
 
       - name: Select or Create Terraform Workspace
-        # working-directory: terraform/
         run: terraform workspace new prod || terraform workspace select prod
 
       - name: Terraform Plan
-        # working-directory: terraform/
         run: terraform plan -var-file="environments/prod.tfvars"
 
       - name: Terraform Apply
-        # working-directory: terraform/
         run: terraform destroy -auto-approve -var-file="environments/prod.tfvars"
         if: github.ref == 'refs/heads/main'
 

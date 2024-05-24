@@ -8,4 +8,7 @@ on:
 jobs:
   call-workflow:
     uses: ./.github/workflows/reusable_terraform_plan.yml
+    with:
+      working_directory: './terraform'
+      aws_region: 'eu-west-2'
     secrets: inherit

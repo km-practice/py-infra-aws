@@ -15,6 +15,9 @@ jobs:
           - staging
           - prod
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
       - name: Call reusable workflow
         uses: ./.github/workflows/reusable_terraform_plan.yml
         with:
@@ -26,6 +29,7 @@ jobs:
           workspace: ${{ matrix.environment }}
           var_file: 'environments/${{ matrix.environment }}.tfvars'
           secrets: inherit
+
 
 
 

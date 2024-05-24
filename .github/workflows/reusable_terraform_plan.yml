@@ -70,7 +70,7 @@ jobs:
           go mod tidy
 
       - name: Run Terratest
-        working-directory: ./test
+        working-directory: terraform/test
         run: go test -v
 
       - name: Set up Python

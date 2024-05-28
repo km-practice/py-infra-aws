@@ -1,40 +1,120 @@
-name: Call Reusable Terraform Workflow Dynamically
+name: Terraform Deployment
 
 on:
-  push:
-    branches:
-      - main
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+      working_directory:
+        required: true
+        type: string
+      aws_region:
+        required: true
+        type: string
+      terraform_version:
+        required: true
+        type: string
+      backend_config_key:
+        required: true
+        type: string
+      workspace:
+        required: true
+        type: string
+      var_file:
+        required: true
+        type: string
+    secrets:
+      token:
+        required: false
+
+  workflow_dispatch:
+
+env:
+  TF_IN_AUTOMATION: true
 
 jobs:
-  call-workflow:
+  deploy:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        environment:
-          - dev
-          - staging
-          - prod
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Call reusable workflow
-        uses: ./.github/workflows/reusable_terraform_plan.yml
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v2
         with:
-          environment: ${{ matrix.environment }}
-          working_directory: './terraform'
-          aws_region: 'eu-west-2'
-          terraform_version: '1.0.0'
-          backend_config_key: 'state/${{ matrix.environment }}/terraform.tfstate'
-          workspace: ${{ matrix.environment }}
-          var_file: 'environments/${{ matrix.environment }}.tfvars'
-          secrets: inherit
+          terraform_version: ${{ inputs.terraform_version }}
 
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ inputs.aws_region }}
 
+      - name: Initialize Terraform Backend
+        working-directory: ${{ inputs.working_directory }}
+        run: terraform init -reconfigure -backend-config="key=${{ inputs.backend_config_key }}"
 
+      - name: Select or Create Terraform Workspace
+        working-directory: ${{ inputs.working_directory }}
+        run: terraform workspace new ${{ inputs.workspace }} || terraform workspace select ${{ inputs.workspace }}
 
+      - name: Terraform Format Check
+        if: ${{ inputs.environment == 'dev' }} 
+        working-directory: ${{ inputs.working_directory }}
+        run: terraform fmt -check
 
+      - name: Terraform Initialize
+        working-directory: ${{ inputs.working_directory }}
+        run: terraform init
 
+      - name: Terraform Validate
+        if: ${{ inputs.environment == 'dev' }}
+        working-directory: ${{ inputs.working_directory }}
+        run: terraform validate
 
+      - name: Terraform Plan
+        working-directory: ${{ inputs.working_directory }}
+        run: terraform plan -var-file="${{ inputs.var_file }}"
 
+      - name: Terraform Apply
+        working-directory: ${{ inputs.working_directory }}
+        run: terraform apply -auto-approve -var-file="${{ inputs.var_file }}"
+        if: github.ref == 'refs/heads/main'
 
+      # - name: Set up Go for Terratest
+      #   if: ${{ inputs.environment == 'dev' }}
+      #   uses: actions/setup-go@v2
+      #   with:
+      #     go-version: '^1.16'
+
+      # - name: Setup Go module
+      #   if: ${{ inputs.environment == 'dev' }}
+      #   run: |
+      #     cd terraform/test
+      #     if [ ! -f go.mod ]; then
+      #       go mod init example.com/terraform-test
+      #     fi
+      #     go mod tidy
+
+      # - name: Run Terratest
+      #   if: ${{ inputs.environment == 'dev' }}
+      #   working-directory: terraform/test
+      #   run: go test -v
+
+      # - name: Set up Python
+      #   if: ${{ inputs.environment == 'dev' }}
+      #   uses: actions/setup-python@v2
+      #   with:
+      #     python-version: '3.x'
+
+      # - name: Install Checkov
+      #   if: ${{ inputs.environment == 'dev' }}
+      #   run: pip install --upgrade checkov
+
+      # - name: Compliance Check with Checkov
+      #   if: ${{ inputs.environment == 'dev' }}
+      #   run: checkov -d terraform/
+      #   continue-on-error: true

@@ -1,186 +1,45 @@
-name: Terraform Deployment
+name: Call a reusable workflow
 
 on:
-<<<<<<< HEAD
-  workflow_call:
-    inputs:
-      environment:
-        required: true
-        type: string
-      working_directory:
-        required: true
-        type: string
-      aws_region:
-        required: true
-        type: string
-      terraform_version:
-        required: true
-        type: string
-      backend_config_key:
-        required: true
-        type: string
-      workspace:
-        required: true
-        type: string
-      var_file:
-        required: true
-        type: string
-    secrets:
-      token:
-        required: false
-
-  workflow_dispatch:
-
-env:
-  TF_IN_AUTOMATION: true
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: ${{ inputs.terraform_version }}
-=======
   push:
     branches:
       - main
-  workflow_dispatch:
-    inputs:
-      environments:
-        description: 'Comma-separated list of environments to deploy to (e.g., dev,staging,prod)'
-        required: true
-        default: 'dev,staging,prod'
-
-env:
-  ENVIRONMENTS: ${{ github.event.inputs.environments || 'dev,staging,prod' }}
 
 jobs:
   call-workflow-dev:
-    if: contains(fromJson('["' + env.ENVIRONMENTS.replace(',', '","') + '"]'), 'dev')
-    runs-on: ubuntu-latest
-    steps:
-      - name: Call reusable workflow for dev
-        uses: ./.github/workflows/reusable_terraform_plan.yml
-        with:
-          environment: 'dev'
-          working_directory: './terraform'
-          aws_region: 'eu-west-2'
-          terraform_version: '1.0.0'
-          backend_config_key: 'state/dev/terraform.tfstate'
-          workspace: 'dev'
-          var_file: 'environments/dev.tfvars'
-        secrets: inherit
+    uses: ./.github/workflows/reusable_terraform_plan.yml
+    with:
+      environment: 'dev'
+      working_directory: './terraform'
+      aws_region: 'eu-west-2'
+      terraform_version: '1.0.0'
+      backend_config_key: 'state/dev/terraform.tfstate'
+      workspace: 'dev'
+      var_file: 'environments/dev.tfvars'
+    secrets: inherit
 
   call-workflow-staging:
-    if: contains(fromJson('["' + env.ENVIRONMENTS.replace(',', '","') + '"]'), 'staging')
     needs: call-workflow-dev
-    runs-on: ubuntu-latest
-    steps:
-      - name: Call reusable workflow for staging
-        uses: ./.github/workflows/reusable_terraform_plan.yml
-        with:
-          environment: 'staging'
-          working_directory: './terraform'
-          aws_region: 'eu-west-2'
-          terraform_version: '1.0.0'
-          backend_config_key: 'state/staging/terraform.tfstate'
-          workspace: 'staging'
-          var_file: 'environments/staging.tfvars'
-        secrets: inherit
+    uses: ./.github/workflows/reusable_terraform_plan.yml
+    with:
+      environment: 'staging'
+      working_directory: './terraform'
+      aws_region: 'eu-west-2'
+      terraform_version: '1.0.0'
+      backend_config_key: 'state/staging/terraform.tfstate'
+      workspace: 'staging'
+      var_file: 'environments/staging.tfvars'
+    secrets: inherit
 
   call-workflow-prod:
-    if: contains(fromJson('["' + env.ENVIRONMENTS.replace(',', '","') + '"]'), 'prod')
     needs: call-workflow-staging
-    runs-on: ubuntu-latest
-    steps:
-      - name: Call reusable workflow for prod
-        uses: ./.github/workflows/reusable_terraform_plan.yml
-        with:
-          environment: 'prod'
-          working_directory: './terraform'
-          aws_region: 'eu-west-2'
-          terraform_version: '1.0.0'
-          backend_config_key: 'state/prod/terraform.tfstate'
-          workspace: 'prod'
-          var_file: 'environments/prod.tfvars'
-        secrets: inherit
->>>>>>> parent of 16e010a (dgweh)
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ inputs.aws_region }}
-
-      - name: Initialize Terraform Backend
-        working-directory: ${{ inputs.working_directory }}
-        run: terraform init -reconfigure -backend-config="key=${{ inputs.backend_config_key }}"
-
-      - name: Select or Create Terraform Workspace
-        working-directory: ${{ inputs.working_directory }}
-        run: terraform workspace new ${{ inputs.workspace }} || terraform workspace select ${{ inputs.workspace }}
-
-      - name: Terraform Format Check
-        if: ${{ inputs.environment == 'dev' }} 
-        working-directory: ${{ inputs.working_directory }}
-        run: terraform fmt -check
-
-      - name: Terraform Initialize
-        working-directory: ${{ inputs.working_directory }}
-        run: terraform init
-
-      - name: Terraform Validate
-        if: ${{ inputs.environment == 'dev' }}
-        working-directory: ${{ inputs.working_directory }}
-        run: terraform validate
-
-      - name: Terraform Plan
-        working-directory: ${{ inputs.working_directory }}
-        run: terraform plan -var-file="${{ inputs.var_file }}"
-
-      - name: Terraform Apply
-        working-directory: ${{ inputs.working_directory }}
-        run: terraform apply -auto-approve -var-file="${{ inputs.var_file }}"
-        if: github.ref == 'refs/heads/main'
-
-      # - name: Set up Go for Terratest
-      #   if: ${{ inputs.environment == 'dev' }}
-      #   uses: actions/setup-go@v2
-      #   with:
-      #     go-version: '^1.16'
-
-      # - name: Setup Go module
-      #   if: ${{ inputs.environment == 'dev' }}
-      #   run: |
-      #     cd terraform/test
-      #     if [ ! -f go.mod ]; then
-      #       go mod init example.com/terraform-test
-      #     fi
-      #     go mod tidy
-
-      # - name: Run Terratest
-      #   if: ${{ inputs.environment == 'dev' }}
-      #   working-directory: terraform/test
-      #   run: go test -v
-
-      # - name: Set up Python
-      #   if: ${{ inputs.environment == 'dev' }}
-      #   uses: actions/setup-python@v2
-      #   with:
-      #     python-version: '3.x'
-
-      # - name: Install Checkov
-      #   if: ${{ inputs.environment == 'dev' }}
-      #   run: pip install --upgrade checkov
-
-      # - name: Compliance Check with Checkov
-      #   if: ${{ inputs.environment == 'dev' }}
-      #   run: checkov -d terraform/
-      #   continue-on-error: true
+    uses: ./.github/workflows/reusable_terraform_plan.yml
+    with:
+      environment: 'prod'
+      working_directory: './terraform'
+      aws_region: 'eu-west-2'
+      terraform_version: '1.0.0'
+      backend_config_key: 'state/prod/terraform.tfstate'
+      workspace: 'prod'
+      var_file: 'environments/prod.tfvars'
+    secrets: inherit
